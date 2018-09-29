@@ -3,13 +3,15 @@
 //September 28, 2018
 
 /*timetrack
-s1:start(9/28/18 23:52)end()span()brief()
+s1:start(9/28/18 23:52)end(9/29/18 00:58)span(1h 06m)brief(create, add logic, test)
 */
 
 #include<iostream>
+#include<string>
 
 using namespace std;
 
+///<summary>Stores basic information about a student.</summary>
 struct Student
 {
 	std::string name;
@@ -17,16 +19,71 @@ struct Student
 	int grades[4];
 };
 
+void collectStructData(Student &);
+double calculateAverage(Student);
+void displayData(const Student*, int);
+
 int prompt_getInt(const char[], int, int, const char[]);
 bool prompt_YesNo(const char[]);
 const char* getOrdinalSufix(int);
 
 int main()
 {
+	Student studentData;
+	double scoreAverage;
+	
+	do
+	{ 
+		collectStructData(studentData);
+		//start of loop
+			//collect data into struct - void return, receives struct by ref 
+			//calculate highest grade (drop lowest grade) - Returns average, recieves struct by val
+			//display data - void return, receives struct by static ref, receives average score
+		//end of loop - ask user is they want to repeat
+	} while (prompt_YesNo("Do you want to repeat? Otherwise the program will exit."));
 
+	return EXIT_SUCCESS;
 }
 
+void collectStructData(Student &studentData)
+{
+	const int SIZE_STUDENT_GRADES = sizeof(Student::grades)/sizeof(int);
 
+	cout << "Enter the student's name: ";
+	getline(cin, studentData.name);
+	cout << "Enter " << studentData.name << "'s student ID: ";
+	getline(cin, studentData.ID);
+
+	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
+	{
+		cout << "Enter the " << i + 1 << getOrdinalSufix(i + 1) << " score: ";
+		studentData.grades[i] = prompt_getInt("", 0, 100, "Invalid score. It has to be between %d and %d: ");
+	}
+}
+
+double calculateAverage(Student studentData)
+{
+	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(int);
+	int lowestGrade, acummulator = 0;
+
+	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
+	{
+		if (i)
+			lowestGrade = studentData.grades[i];
+		else if (studentData.grades[i] < lowestGrade)
+			lowestGrade = studentData.grades[i];
+
+		acummulator += studentData.grades[i];
+	}
+
+	acummulator -= lowestGrade;
+	return acummulator/(SIZE_STUDENT_GRADES-1);
+}
+
+void displayData(const Student *studentData, int scoreAverate)
+{
+
+}
 
 ///<summary>Shows a prompt to the user, accepts an integer input within a given range, and then returns the number to the caller.</summary>
 ///<param name = "message">Prompt that will be shown before requesting the input.</param>
@@ -43,7 +100,7 @@ int prompt_getInt(const char message[], int min, int max, const char notValidMes
 		&& !(std::cin >> retInt)			//return is null when input is not valid
 		|| (retInt > max || retInt < min))	//true when outside of valid range
 	{
-		printf("%s %d and %d: ", notValidMessage, min, max);
+		printf(notValidMessage, min, max);
 		std::cin.clear();
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
