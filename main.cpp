@@ -4,7 +4,7 @@
 
 /*timetrack
 s1:start(9/28/18 23:52)end(9/29/18 00:58)span(1h 06m)brief(create, add logic, test)
-s2:start(9/29/18 18:41)end(9/29/18 )span()brief()
+s2:start(9/29/18 18:41)end(9/29/18 19:25)span(0h 44m)brief(finish up, test, debug)
 */
 
 #include<iostream>
@@ -23,7 +23,7 @@ struct Student
 
 void collectStructData(Student &);
 double calculateAverage(Student);
-void displayData(const Student*, int);
+void displayData(const Student*, double);
 
 int prompt_getInt(const char[], bool, const char[]);
 int prompt_getInt(const char[], int, int, const char[]);
@@ -35,12 +35,13 @@ int main()
 	Student studentData;
 	double scoreAverage;
 	
-	cout << "This program accepts a student's data and four grades. It calcualtes the average and displays it\n";
+	cout << "This program accepts a student's data and four grades. It calcualtes the average and displays it.\n";
 
 	system("pause");
 
 	do
 	{ 
+		cout << endl;
 		collectStructData(studentData);
 		scoreAverage = calculateAverage(studentData);
 		displayData(&studentData, scoreAverage);
@@ -76,7 +77,7 @@ double calculateAverage(Student studentData)
 
 	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
 	{
-		if (i)
+		if (!i)
 			lowestGrade = studentData.grades[i];
 		else if (studentData.grades[i] < lowestGrade)
 			lowestGrade = studentData.grades[i];
@@ -85,10 +86,10 @@ double calculateAverage(Student studentData)
 	}
 
 	acummulator -= lowestGrade;
-	return acummulator/(SIZE_STUDENT_GRADES-1);
+	return static_cast<double>(acummulator)/(SIZE_STUDENT_GRADES-1);
 }
 
-void displayData(const Student *studentData, int scoreAverage)
+void displayData(const Student *studentData, double scoreAverage)
 {
 	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(int);
 	const char SEPARATOR[55] = "------------------------------------------------------"; //54 dashes
@@ -105,7 +106,8 @@ void displayData(const Student *studentData, int scoreAverage)
 	}
 
 	cout << "}" << endl;
-	cout << setw(TAB_SIZE) << left << "Average (of 3 highest):" << scoreAverage << endl;
+	cout << setw(TAB_SIZE) << left << "Average (of 3 highest):" <<
+		setprecision(2) << fixed << showpoint << scoreAverage << endl;
 	cout << SEPARATOR << endl;
 }
 
