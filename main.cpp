@@ -5,6 +5,7 @@
 /*timetrack
 s1:start(9/28/18 23:52)end(9/29/18 00:58)span(1h 06m)brief(create, add logic, test)
 s2:start(9/29/18 18:41)end(9/29/18 19:25)span(0h 44m)brief(finish up, test, debug)
+s3:start(9/29/18 20:33)end(9/29/18 21:00)span(0h 27m)brief(documentation)
 */
 
 #include<iostream>
@@ -32,28 +33,30 @@ const char* getOrdinalSufix(int);
 
 int main()
 {
-	Student studentData;
-	double scoreAverage;
+	Student studentData; //stores the current student data that the user inputs
+	double scoreAverage; //stores the average calculated from the scores in studentData
 	
+	//Initial prompt
 	cout << "This program accepts a student's data and four grades. It calcualtes the average and displays it.\n";
-
 	system("pause");
 
+	//Main loop to repeat program
 	do
 	{ 
 		cout << endl;
 		collectStructData(studentData);
 		scoreAverage = calculateAverage(studentData);
 		displayData(&studentData, scoreAverage);
-			//calculate highest grade (drop lowest grade) - Returns average, recieves struct by val
-			//display data - void return, receives struct by static ref, receives average score
 	} while (prompt_YesNo("Do you want to repeat? Otherwise the program will exit."));
 
 	return EXIT_SUCCESS;
 }
 
+///<summary>Prompts the user to enter appropriate data to fill a <c>Student</c> struct</summary>
+///<param name = "studentData">The <c>Student</c> struct that will store the user's input.</param>
 void collectStructData(Student &studentData)
 {
+	//Contains the array size of Student member 'grades'
 	const int SIZE_STUDENT_GRADES = sizeof(Student::grades)/sizeof(int);
 
 	cout << "Enter the student's name: ";
@@ -63,6 +66,7 @@ void collectStructData(Student &studentData)
 	studentData.ID = prompt_getInt("",true,"ID has to be a positive non-zero number: ");
 	//getline(cin, studentData.ID);
 
+	//collects and stores the grades into the array memeber of the Student struct
 	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
 	{
 		cout << "Enter the " << i + 1 << getOrdinalSufix(i + 1) << " score: ";
@@ -70,14 +74,19 @@ void collectStructData(Student &studentData)
 	}
 }
 
+///<summary>Calculates the average of a <c>Student</c> struct and returns the average all scores but the lowest.</summary>
+///<param name = "studentData">The <c>Student</c> struct that contains the student's data.</param>
+///<returns>The average</returns>
 double calculateAverage(Student studentData)
 {
+	//Contains the array size of Student member 'grades'
 	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(int);
 	int lowestGrade, acummulator = 0;
 
+	//Finds lowest grade and adds them all
 	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
 	{
-		if (!i)
+		if (!i) //true on first loop
 			lowestGrade = studentData.grades[i];
 		else if (studentData.grades[i] < lowestGrade)
 			lowestGrade = studentData.grades[i];
@@ -85,21 +94,26 @@ double calculateAverage(Student studentData)
 		acummulator += studentData.grades[i];
 	}
 
-	acummulator -= lowestGrade;
+	acummulator -= lowestGrade; //gets rid of lower score
 	return static_cast<double>(acummulator)/(SIZE_STUDENT_GRADES-1);
 }
 
+///<summary>Prints a formatted report of the data stored in <c>studentData</c> to the standard output device.</summary>
+///<param name = "studentData">The <c>Student</c> struct that contains the student's data.</param>
+///<param name = "scoreAverage">The calculated average of the scores stored in <c>studentData</c></param>
 void displayData(const Student *studentData, double scoreAverage)
 {
+	//Contains the array size of Student member 'grades'
 	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(int);
 	const char SEPARATOR[55] = "------------------------------------------------------"; //54 dashes
-	const int TAB_SIZE = 30; //Output columns width
+	const int TAB_SIZE = 30; //Output column width
 
 	cout << SEPARATOR << endl;
 	cout << setw(TAB_SIZE) << left << "Student's name:" << studentData->name << endl;
 	cout << setw(TAB_SIZE) << left << "Student's ID:" << studentData->ID << endl;
 	cout << setw(TAB_SIZE) << left << "Student's grades:" << "{";
 
+	//prints the values contained on the 'grades' memeber of the Student struct
 	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
 	{
 		cout << studentData->grades[i] << (i < SIZE_STUDENT_GRADES - 1?",":"");
