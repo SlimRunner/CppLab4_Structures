@@ -4,10 +4,12 @@
 
 /*timetrack
 s1:start(9/28/18 23:52)end(9/29/18 00:58)span(1h 06m)brief(create, add logic, test)
+s2:start(9/29/18 18:41)end(9/29/18 )span()brief()
 */
 
 #include<iostream>
 #include<string>
+#include<iomanip>
 
 using namespace std;
 
@@ -15,7 +17,7 @@ using namespace std;
 struct Student
 {
 	std::string name;
-	std::string ID;
+	int ID;
 	int grades[4];
 };
 
@@ -23,6 +25,7 @@ void collectStructData(Student &);
 double calculateAverage(Student);
 void displayData(const Student*, int);
 
+int prompt_getInt(const char[], bool, const char[]);
 int prompt_getInt(const char[], int, int, const char[]);
 bool prompt_YesNo(const char[]);
 const char* getOrdinalSufix(int);
@@ -32,14 +35,17 @@ int main()
 	Student studentData;
 	double scoreAverage;
 	
+	cout << "This program accepts a student's data and four grades. It calcualtes the average and displays it\n";
+
+	system("pause");
+
 	do
 	{ 
 		collectStructData(studentData);
-		//start of loop
-			//collect data into struct - void return, receives struct by ref 
+		scoreAverage = calculateAverage(studentData);
+		displayData(&studentData, scoreAverage);
 			//calculate highest grade (drop lowest grade) - Returns average, recieves struct by val
 			//display data - void return, receives struct by static ref, receives average score
-		//end of loop - ask user is they want to repeat
 	} while (prompt_YesNo("Do you want to repeat? Otherwise the program will exit."));
 
 	return EXIT_SUCCESS;
@@ -51,8 +57,10 @@ void collectStructData(Student &studentData)
 
 	cout << "Enter the student's name: ";
 	getline(cin, studentData.name);
+
 	cout << "Enter " << studentData.name << "'s student ID: ";
-	getline(cin, studentData.ID);
+	studentData.ID = prompt_getInt("",true,"ID has to be a positive non-zero number: ");
+	//getline(cin, studentData.ID);
 
 	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
 	{
@@ -80,9 +88,47 @@ double calculateAverage(Student studentData)
 	return acummulator/(SIZE_STUDENT_GRADES-1);
 }
 
-void displayData(const Student *studentData, int scoreAverate)
+void displayData(const Student *studentData, int scoreAverage)
 {
+	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(int);
+	const char SEPARATOR[55] = "------------------------------------------------------"; //54 dashes
+	const int TAB_SIZE = 30; //Output columns width
 
+	cout << SEPARATOR << endl;
+	cout << setw(TAB_SIZE) << left << "Student's name:" << studentData->name << endl;
+	cout << setw(TAB_SIZE) << left << "Student's ID:" << studentData->ID << endl;
+	cout << setw(TAB_SIZE) << left << "Student's grades:" << "{";
+
+	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
+	{
+		cout << studentData->grades[i] << (i < SIZE_STUDENT_GRADES - 1?",":"");
+	}
+
+	cout << "}" << endl;
+	cout << setw(TAB_SIZE) << left << "Average (of 3 highest):" << scoreAverage << endl;
+	cout << SEPARATOR << endl;
+}
+
+///<summary>Shows a prompt to the user, accepts an integer input, and then returns the number to the caller.</summary>
+///<param name = "message">Prompt that will be shown before requesting the input.</param>
+///<param name = "onlyNatural">If true this function will only accept non-zero positive values.</param>
+///<param name = "notValidMessage">Prompt that will be shown after an invalid input.</param>
+///<returns>Returns the integer value entered by user.</returns>
+int prompt_getInt(const char message[], bool onlyNatural, const char notValidMessage[])
+{
+	int retInt;
+
+	//validation
+	while ((std::cout << message)			//return is irrelevant, it's here to loop the message
+		&& !(std::cin >> retInt)			//return is null when input is not valid
+		|| (retInt < 1 && onlyNatural))		//true when outside of valid range
+	{
+		std::cout << notValidMessage << std::endl;
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
+
+	return retInt;
 }
 
 ///<summary>Shows a prompt to the user, accepts an integer input within a given range, and then returns the number to the caller.</summary>
