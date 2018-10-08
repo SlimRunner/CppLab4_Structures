@@ -17,9 +17,9 @@ using namespace std;
 ///<summary>Stores basic information about a student.</summary>
 struct Student
 {
-	std::string name;
-	int ID;
-	int grades[4];
+	string name;
+	int id;
+	double grades[4];
 };
 
 void collectStructData(Student &);
@@ -28,6 +28,7 @@ void displayData(const Student*, double);
 
 int prompt_getInt(const char[], bool, const char[]);
 int prompt_getInt(const char[], int, int, const char[]);
+double prompt_getDouble(const char[], bool, const char[]);
 bool prompt_YesNo(const char[]);
 const char* getOrdinalSufix(int);
 
@@ -35,14 +36,14 @@ int main()
 {
 	Student studentData; //stores the current student data that the user inputs
 	double scoreAverage; //stores the average calculated from the scores in studentData
-	
+
 	//Initial prompt
 	cout << "This program accepts a student's data and four grades. It calcualtes the average and displays it.\n";
 	system("pause");
 
 	//Main loop to repeat program
 	do
-	{ 
+	{
 		cout << endl;
 		collectStructData(studentData);
 		scoreAverage = calculateAverage(studentData);
@@ -57,20 +58,20 @@ int main()
 void collectStructData(Student &studentData)
 {
 	//Contains the array size of Student member 'grades'
-	const int SIZE_STUDENT_GRADES = sizeof(Student::grades)/sizeof(int);
+	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(double);
 
 	cout << "Enter the student's name: ";
 	getline(cin, studentData.name);
 
 	cout << "Enter " << studentData.name << "'s student ID: ";
-	studentData.ID = prompt_getInt("",true,"ID has to be a positive non-zero number: ");
+	studentData.id = prompt_getInt("", true, "ID has to be a positive non-zero number: ");
 	//getline(cin, studentData.ID);
 
 	//collects and stores the grades into the array memeber of the Student struct
 	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
 	{
 		cout << "Enter the " << i + 1 << getOrdinalSufix(i + 1) << " score: ";
-		studentData.grades[i] = prompt_getInt("", 0, 100, "Invalid score. It has to be between %d and %d: ");
+		studentData.grades[i] = prompt_getDouble("",true, "Score has to be a positive number: ");
 	}
 }
 
@@ -80,8 +81,9 @@ void collectStructData(Student &studentData)
 double calculateAverage(Student studentData)
 {
 	//Contains the array size of Student member 'grades'
-	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(int);
-	int lowestGrade, acummulator = 0;
+	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(double);
+	int lowestGrade;
+	double acummulator = 0;
 
 	//Finds lowest grade and adds them all
 	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
@@ -95,7 +97,7 @@ double calculateAverage(Student studentData)
 	}
 
 	acummulator -= lowestGrade; //gets rid of lower score
-	return static_cast<double>(acummulator)/(SIZE_STUDENT_GRADES-1);
+	return acummulator / (SIZE_STUDENT_GRADES - 1);
 }
 
 ///<summary>Prints a formatted report of the data stored in <c>studentData</c> to the standard output device.</summary>
@@ -104,19 +106,19 @@ double calculateAverage(Student studentData)
 void displayData(const Student *studentData, double scoreAverage)
 {
 	//Contains the array size of Student member 'grades'
-	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(int);
+	const int SIZE_STUDENT_GRADES = sizeof(Student::grades) / sizeof(double);
 	const char SEPARATOR[55] = "------------------------------------------------------"; //54 dashes
 	const int TAB_SIZE = 30; //Output column width
 
 	cout << SEPARATOR << endl;
 	cout << setw(TAB_SIZE) << left << "Student's name:" << studentData->name << endl;
-	cout << setw(TAB_SIZE) << left << "Student's ID:" << studentData->ID << endl;
+	cout << setw(TAB_SIZE) << left << "Student's ID:" << studentData->id << endl;
 	cout << setw(TAB_SIZE) << left << "Student's grades:" << "{";
 
 	//prints the values contained on the 'grades' memeber of the Student struct
 	for (int i = 0; i < SIZE_STUDENT_GRADES; i++)
 	{
-		cout << studentData->grades[i] << (i < SIZE_STUDENT_GRADES - 1?",":"");
+		cout << (i > 0 ? ", " : "") << studentData->grades[i];
 	}
 
 	cout << "}" << endl;
@@ -139,7 +141,7 @@ int prompt_getInt(const char message[], bool onlyNatural, const char notValidMes
 		&& !(std::cin >> retInt)			//return is null when input is not valid
 		|| (retInt < 1 && onlyNatural))		//true when outside of valid range
 	{
-		std::cout << notValidMessage << std::endl;
+		std::cout << notValidMessage;
 		std::cin.clear();
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
@@ -170,6 +172,23 @@ int prompt_getInt(const char message[], int min, int max, const char notValidMes
 	return retInt;
 }
 
+double prompt_getDouble(const char message[], bool onlyPositive, const char notValidMessage[])
+{
+	double retDouble;
+
+	//validation
+	while ((std::cout << message)				//return is irrelevant, it's here to loop the message
+		&& !(std::cin >> retDouble)				//return is null when input is not valid
+		|| (retDouble < 0 && onlyPositive))		//true when outside of valid range
+	{
+		std::cout << notValidMessage;
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
+
+	return retDouble;
+}
+
 ///<summary>Promts the user to input either 'y' (yes) or 'n' (no). Input is not case sensitive.</summary>
 ///<param name = "message">The initial custom prompt that will be shown.</param>
 ///<returns>Returns true is the user entered 'y' and false if input is 'n'.</returns>
@@ -192,7 +211,7 @@ bool prompt_YesNo(const char message[])
 
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); //avoid buffer jumping going to the caller
 
-	//resolve return
+																		//resolve return
 	switch (tolower(userInput))
 	{
 	case 'y':
